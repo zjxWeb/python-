@@ -1,7 +1,3 @@
----
-typora-root-url: src
----
-
 # python 爬虫
 
 ## 一. 开发环境配置
@@ -45,16 +41,16 @@ typora-root-url: src
 
   2. 查看chrome版本，并下载相对应的ChromeDriver版本，**如果没有可以下载相近的。**
      - 点击 Chrome 菜单“帮助”→“关于Google Chrome”,即可查看Chrome的版本号
-     - ![1](/1.png)
+     - ![1](src/1.png)
 
   3. 环境变量配置
      - 在Windows下，建议直接将chromedriver.exe文件拖到Python的Scripts目录下，此外，也可以单独将其所在路径配置到环境变量。
-     - ![2](/2.png)
+     - ![2](src/2.png)
      - 验证安装
      
        - 在 `cmd`下执行`chromedriver`
      
-       - ![3](/3.png)
+       - ![3](src/3.png)
      
        - 随后执行一下的python代码进行测试
      
@@ -63,7 +59,7 @@ typora-root-url: src
          brower = webdriver.Chrome()
          ```
      
-         - ![4](/4.png)
+         - ![4](src/4.png)
          - 运行之后，如果弹出一个空白的Chrome浏览器，则证明所有的配置都没有问题。如果没有弹出,请检查之前的每一步配置。
          - 如果弹出后闪退,则可能是 ChromeDriverer版本和 Chrome版本不兼容，请更换 ChromeDriver版本。
          - 如果没有问题,接下来就可以利用Chrome来做网页抓取了。
@@ -121,4 +117,6 @@ typora-root-url: src
     + `pip3 install cchardet aiodns `
 + 验证
   + `import aiohttp`,在python下输入没有报错，则证明安装成功。
-+ 
+
+## 二. 
+
