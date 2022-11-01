@@ -45,7 +45,7 @@ typora-root-url: src
 
   2. 查看chrome版本，并下载相对应的ChromeDriver版本，**如果没有可以下载相近的。**
      - 点击 Chrome 菜单“帮助”→“关于Google Chrome”,即可查看Chrome的版本号
-     - ![1](/1.png)
+     - ![1](src/1.png)
 
   3. 环境变量配置
      - 在Windows下，建议直接将chromedriver.exe文件拖到Python的Scripts目录下，此外，也可以单独将其所在路径配置到环境变量。
