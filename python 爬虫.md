@@ -118,6 +118,130 @@
 + 验证
   + `import aiohttp`,在python下输入没有报错，则证明安装成功。
 
+### 2. 基本库的使用
+
+#### 2.1 urliib
+
++ request:这是最基本的 HTTP 请求模块，可以模拟请求的发送。就像在浏览器里输人网址然后按下回车一样，只需要给库方法传入 URL 以及额外的参数，就可以模拟实现发送请求的过程了。
++ error:异常处理模块。如果出现请求异常,那么我们可以捕获这些异常，然后进行重试或其他操作以保证程序运行不会意外终止。
++ parse;一个工具模块。提供了许多URL的处理方法，例如拆分、解析、合并等。
++ robotparser:主要用来识别网站的robots.txt文件，然后判断哪些网站可以爬,哪些网站不可以，它其实用得比较少。
+
+##### 2.1.1 urlopen
+
++ **这里有些测试链接是自己搭建的服务\**本地进行的\*\***
+
++ ```py
+  # -*- coding: UTF-8 -*-
+  import urllib.request
+  import urllib.parse
+  
+  
+  # urlopen
+  # urllib. request模块提供了最基本的构造HTTP请求的方法,利用这个模块可以模拟浏览器的请求发起过程，同时它还具有处理授权验证(Authentication )、重定向(Redirection )、浏览器Cookie以,及其他一些功能。
+  
+  
+  # response = urllib.request.urlopen("https://www.python.org")
+  
+  # print(response.read().decode('utf-8'))
+  
+  # 响应是一个 HTTPResposne类型的对象，主要包含 read,readinto、 getheader.getheaders、 fileno 等方法，以及msg, version ,status. reason、debuglevel .closed等属性。
+  # print(type(response))
+  
+  # urllib.request.urlopen(url,data=None, [timeout, ]*, cafile-None , capatheNone ,cadefault=False, context-None)
+  # data 参数
+  # timeout 参数 0.1
+  # context 参数 该参数必须是ssl.SSLContext类型，用来指定SSL的设置。
+  data = bytes(urllib.parse.urlencode({"id": 32}), encoding='utf-8')
+  # post 请求，传参"id": 32
+  try:
+      response = urllib.request.urlopen("http://127.0.0.1:3000/idLightMsg", data=data, timeout=0.1)
+  except urllib.error.URLError as e:
+      if isinstance(e.reason.socket.timeout):
+          print('time out')
+  print(response.read().decode('utf-8'))
+  ```
+
+##### 2.1.2 Request
+
++ 利用urlopen方法可以发起最基本的请求,但1它那几个简单的参数并不足以构建一个完整的请求。如果需要往请求中加入 Headers等信息，就得利用更强大的Request类来构建请求了.
++ `class urllib.request.Request(url,data=None,headers=f, origin_req_host=None，unverifiable=False，method=None)`
+  + 第一个参数url用于请求URL,这是必传参数，其他的都是可选参数。
+  + 第二个参数data如果要传数据，必须传byttes,类型的。如果数据是字典，可以先用urllib.parse模块里的urlencode方法进行编码。
+  + 第三个参数 headers是一个字典，这就是请求头，我们在构造请求时，既可以通过 headers参数直接构造此项，也可以通过调用请求实例的add header方法添加。添加请求头最常见的方法就是通过修改 User-Agent来伪装浏览器。默认的 User-Agent是Python-urllib,我们可以通过修改这个值来伪装浏览器.例如要伪装火狐浏览器.就可以把User-Ag:ent设置为:Mozilla/5.o (X11; u; Linux i686)Cecko/20071127Firefox/2.0.0.11
+  + 第四个参数origin_req host指的是请求方的host名称或者IP地址。
+  + 第五个参数 unverifiable表示请求是否是无法验证的，默认取值是False，意思是用户没有足够的权限来接收这个请求的结果。例如,请求一个HTML文档中的图片,但是没有自动抓取图像的权限，这时unverifiable的值就是Truea
+  + 第六个参数method是一个字符串，用来指示请求使用的方法，例如 GET,POST和 PUT等。
+  
++ ```python
+  # -*- coding: UTF-8 -*-
+  from urllib import request,parse
+  # class urllib.request.Request(url,data=None,headers=f, origin_req_host=None，unverifiable=False，method=None)
+  url = 'http://127.0.0.1:3000/idLightMsg'
+  # headers = {
+  #     'User-Agent': 'Mozi11a/4.0 (compatible; MSIE 5.5; Windows NT)',
+  #     'Host': 'www.httpbin.org'
+  # }
+  
+  dict = {"id": 32}
+  data = bytes(parse.urlencode(dict), encoding='utf-8')
+  # req = request.Request(url=url, data=data, headers=headers, method="POST")
+  req = request.Request(url=url, data=data, method="POST")
+  # 使用此方法记得将 “：” 变成  “，”
+  req.add_header('User-Agent', 'Mozi11a/4.0 (compatible; MSIE 5.5; Windows NT)')
+  response = request.urlopen(req)
+  print(response.read().decode('utf-8'))
+  ```
+
++ 高级用法
+
+  + Handler可以理解为各种处理器，有专门处理登录验证的，处理Cookie的，处理代理设置的。利用这些Handler，我们几乎可以实现HTTP请求中所有的功能。
+
+  + 会有各种Handler子类继承BaseHandler类，接下来举几个子类的例子如下：
+
+    + HTTPDefaultErrorHandler用于处理HTTP响应错误，所有错误都会抛出HTTPError类型的异常。
+    + HTTPRedirectHandler 用于处理重定向。
+    + HTTPCookieProcessor 用于处理Cookie。
+    + ProxyHandler用于设置代理，代理默认为空。
+    + HTTPPasswordMgr用于管理密码,它维护着用户名密码的对照表。
+    + HTTPBasicAuthHandler用于管理认证，如果一个链接在打开时需要认证，那么可以用这个类来解决认证问题。
+
+  + Opener类可以提供open方法，该方法返回的响应类型和urlopen方法如出一辙。利用Handler类来构建Opener类。
+
+  + **网站启用身份认真**
+
+    + ```python
+      from urllib.request import HTTPPasswordMgrWithDefaultRealm,HTTPBasicAuthHandler,build_opener
+      from urllib.error import URLError
+      
+      username = 'admin'
+      password = 'admin'
+      url = 'https://ssr3.scrape.center'
+      p = HTTPPasswordMgrWithDefaultRealm()
+      p.add_password(None, url, username, password)
+      auth_hander = HTTPBasicAuthHandler(p)
+      opener = build_opener(auth_hander)
+      
+      try:
+          result = opener.open(url)
+          html = result.read().decode('utf-8')
+          print(html)
+      except URLError as  e:
+          print(e.reason)
+      ```
+
+    + 上述代码首先实例了一个`HTTPBasicAuthHandler`对象 `auto_handler`,其中参数是`HTTPPasswordMgrWithDefaultRealm`对象，它利用 `add_password`方法添加用户名和密码，这二样就建立了一个用来处理验证的`Handler`类。
+
+    + 然后将刚建立的`auth_handler`类作为参数传入`build_opener`方法，构建一个`Opener`，这个`Opener`在发送请求时就相当于已经验证成功了。
+
+    + 最后利用`Opener`类中的open方法打开链接，即可完成验证。这里获取的结果就是验证成功后的页面源码内容。
+
++ 代理
+
+  + 
+
+
+
 ## 二. 爬虫基础
 
 ### 2.1 Http基本原理
@@ -271,4 +395,39 @@
 + 提取信息
 + 保存信息
 + 自动化程序
+
+### 2.4 代理的基本原理
+
++ 代理的作用
+  + 突破自身IP的访问限制,访问一些平时不能访问的站点。
+  + 访问一些单位或团体的内部资源。比如,使用教育网内地址段的免费代理服务器，就可以下载和上传对教育网开放的各类FTP,也可以查询、共享各类资料等。
+  + 提高访问速度。通常,代理服务器会设置一个较大的硬盘缓冲区,当有外界的信息通过时,会同时将其保存到自己的缓冲区中，当其他用户访问相同的信息时,直接从缓冲区中取出信息,提高了访问速度。
+  + 隐藏真实IP:上网者可以通过代理隐藏自己的IP,免受攻击。对于爬虫来说，使用代理就是为了隐藏自身IP,防止自身的P被封锁。
++ 代理分类
+  + 根据代理得 协议，代理可以分为如下几类：
+    + FTP代理服务器:主要用于访问FTP服务器，一般有上传、下载以及缓存功能,端口一般为21、2121等。
+    + HTTP代理服务器:主要用于访问网页，一般有内容过滤和缓存功能,端口一般为80、8080,3128等。
+    + SSL/TLS代理:主要用于访问加密网站、一般有SSL或TLS加密功能(最高支持128位加密强度)、端口一般为443,
+    + RTSP代理:主要用于Realplayer访问Real流媒体服务器，一般有缓存功能,端口一般为554。
+    + Telnet代理:主要用于Telnet远程控制(黑客入侵计算机时常用于隐藏身份),端口一般为23。POP3/SMTP代理:主要用于以POP3/SMTP方式收发邮件，一般有缓存功能,端口一般为110/25。
+    + SOCKS代理:只是单纯传递数据包，不关心具体协议和用法，所以速度快很多，一般有缓存功能，端口一般为1080。SOCKS代理协议又分为SOCKS4和 SOCKS5，SOCKS4协议只支持TCP,sOCKS5协议则支持TCP和UDP，还支持各种身份验证机制、服务器端域名解析等。简单来说，SOCKS4能做到的SOCKS5都能做到，但 SOCKS5能做到的 SOCKs4不一定做得到。
+  + 根据匿名程度区分
+    + **高度匿名代理**:高度匿名代理会将数据包原封不动地转发,在服务端看来似乎真的是一个普通客户端在访问,记录的IP则是代理服务器的IP。
+    + **普通匿名代理**:普通匿名代理会对数据包做一些改动,服务端可能会发现正在访问自己的是个代理服务器.并且有一定概率去追查客户端的真实IP。这里代理服务器通常会加人的HTTP头有HTTP_ VIA 和 HTTP_ X FORWARDED_FOR。
+    + **透明代理**:透明代理不但改动了数据包，还会告诉服务器客户端的真实IP。这种代理除了能用缓存技术提高浏览速度、用内容过滤提高安全性之外,并无其他显著作用,最常见的例子是内网中的硬件防火墙。
+    + **间谍代理**:间谍代理是由组织或个人创建的代理服务器,用于记录用户传输的数据,然后对记录的数据进行研究,监控等。
+  + 常见的代理方式
+    + 对于网上的免费代理,最好使用高度匿名代理,可以在使用前把所有代理都抓取下来筛选一下可用代理，也可以进一步维护一个代理池。
+    + 使用付费代理服务。互联网上存在许多可以付费使用的代理商，质量要比免费代理好很多。
+    + ADSL拨号，拨一次号换一次IP,稳定性高，也是一种比较有效的封锁解决方案。
+    + 蜂窝代理，即用4G或5G网卡等制作的代理。由于用蜂窝网络作为代理的情形较少，因此整体被封锁的概率会较低,但搭建蜂窝代理的成本是较高的。
+
+### 2.5 Python中的多线程和多进程
+
++ Python中 GIL的限制导致不论是在单核还是多核条件下,同一时刻都只能运行一个线程,这使得Python多线程无法发挥多核并行的优势。
++ GIL全称为Global Interpreter Lock，意思是全局解释器锁，其设计之初是出于对数据安全的考虑。在 Python多线程下、每个线程的执行方式分如下三步：
+  + 获取DIL
+  + 执行对应线程的代码
+  + 释放DIL
++ 
 
