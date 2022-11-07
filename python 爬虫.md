@@ -208,7 +208,7 @@
 
   + Opener类可以提供open方法，该方法返回的响应类型和urlopen方法如出一辙。利用Handler类来构建Opener类。
 
-  + **网站启用身份认真**
+  + **网站启用身份人证**
 
     + ```python
       from urllib.request import HTTPPasswordMgrWithDefaultRealm,HTTPBasicAuthHandler,build_opener
