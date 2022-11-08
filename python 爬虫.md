@@ -193,7 +193,7 @@
   print(response.read().decode('utf-8'))
   ```
 
-+ 高级用法
++ **高级用法**
 
   + Handler可以理解为各种处理器，有专门处理登录验证的，处理Cookie的，处理代理设置的。利用这些Handler，我们几乎可以实现HTTP请求中所有的功能。
 
@@ -236,11 +236,125 @@
 
     + 最后利用`Opener`类中的open方法打开链接，即可完成验证。这里获取的结果就是验证成功后的页面源码内容。
 
-+ 代理
++ **代理**
 
-  + 
+  + ```py
+    from urllib.error import URLError
+    from urllib.request import ProxyHandler,build_opener
+    
+    proxy_hander = ProxyHandler({
+        # 可以添加多个代理
+        'http': 'http://127.0.0.1:8080',
+        'https': 'http://127.0.0.1:8080',
+    })
+    
+    opener = build_opener(proxy_hander)
+    
+    try:
+        reponse = opener.open('https://baidu.com')
+        print(reponse.read().decode('utf-8'))
+    except URLError as e:
+        print(e.reason)
+    
+    ```
+  
++ **cookie**
+
+  + ```py
+    # 获取网战的cookie
+    import http.cookiejar,urllib.request
+    
+    cookie = http.cookiejar.CookieJar()
+    handler = urllib.request.HTTPCookieProcessor(cookie)
+    opener = urllib.request.build_opener(handler)
+    response = opener.open('https://baidu.com')
+    
+    for item in cookie:
+        print(item.name + "=" + item.value)
+    ```
+
+  + 首先，必须声明一个`CookieJar`对象。然后需要利用 `HTTPCookieProcessor`创建一个 `Handler` 最后利用`build_opener` 方法构建`Opener`,执行`open`函数即可。
+
+  + **生成cookie并保存为文件** **注意格式**
+
+    + ```python
+      # cookie生成文件
+      
+      import urllib.request,http.cookiejar
+      
+      filename = 'cookie.txt'
+      # MozillaCookieJar是CookieJar的子类，可以将Cookie保存成 Mozilla 型浏览器的Cookie格式
+      # cookie = http.cookiejar.MozillaCookieJar(filename)
+      
+      # 另外,LwPCookieJar同样可以读取和保存Cookie,只是Cookie文件的保存格式和MozillaCookieJar不一样,它会保存成LWP( libwww-perl)格式。
+      cookie = http.cookiejar.LWPCookieJar(filename)
+      
+      handler = urllib.request.HTTPCookieProcessor(cookie)
+      opener = urllib.request.build_opener(handler)
+      response = opener.open('https://baidu.com' )
+      # ignore_discard的意思是即使cookies将被丢弃也将它保存下来，ignore_expires的意思是如果cookies已经过期也将它保存并且文件已存在时将覆盖，
+      cookie.save(ignore_discard=True, ignore_expires=True )
+      ```
+
+  + **load cookie**
+
+    + ```pyt
+      import urllib.request,http.cookiejar
+      
+      cookie = http.cookiejar.LWPCookieJar()
+      cookie.load('cookie.txt', ignore_discard=True, ignore_expires=True)
+      handler = urllib.request.HTTPCookieProcessor(cookie)
+      opener = urllib.request.build_opener(handler)
+      response = opener.open('https://baidu.com')
+      print(response.read().decode('utf-8'))
+      ```
+
+    + 这里调用load方法来读取本地的Cookie文件，获取了Cookie的内容。 **记得提前生成LWPCookieJar格式的Cookie，并保存成了文件**
+
+  + **异常处理**
+
+    + **URLerror**
+
+      + ```py
+        from urllib import request,error
+        
+        try:
+            response = request.urlopen('https://cuiqingcai.com/404')
+        except error.URLError as e:
+            # reason属相，即返回错误的原因
+            print(e.reason)
+        ```
+
+    + **HTTPError**
+
+      + ```python
+        from urllib import  request,error
+        try:
+            response = request.urlopen('https://cuiqingcai.com/404')
+        except error.HTTPError as e:
+            print(e.reason, e.code, e.headers, sep="\n")
+        ```
+
+    + ```py
+      import socket
+      import urllib.request
+      import urllib.error
+      
+      # reason属性返回的不一定是字符串，也可能是一个对象
+      try:
+          response = urllib.request.urlopen('https://www.baidu.com',timeout=0.01)
+      except urllib.error.URLError as e:
+          print(type(e.reason))
+          if isinstance(e.reason, socket.timeout):
+              print('Time OUT')
+      # reason属性的结果是socket.timeout类。所以这里可以用isintance方法来判断它的类型，做出更详细的异常普安段。
+      ```
 
 
+##### 2.1.3 解析链接（Parse）
+
++ urllib库里还提供了parse模块,这个模块定义了处理URL的标准接口,例如实现URL各部分的抽取、合并以及链接转换。它支持如下协议的URL处理:file、ftp 、gopher、hdl ,http 、https、imap、mailto. mms ,news. nntp , prospero、rsync、rtsp.rtspu,sftp . sip,sips、snews ,svn,svn+ssh 、telnet和 wais 。
++ 
 
 ## 二. 爬虫基础
 
