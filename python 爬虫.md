@@ -354,7 +354,86 @@
 ##### 2.1.3 解析链接（Parse）
 
 + urllib库里还提供了parse模块,这个模块定义了处理URL的标准接口,例如实现URL各部分的抽取、合并以及链接转换。它支持如下协议的URL处理:file、ftp 、gopher、hdl ,http 、https、imap、mailto. mms ,news. nntp , prospero、rsync、rtsp.rtspu,sftp . sip,sips、snews ,svn,svn+ssh 、telnet和 wais 。
-+ 
++ **urlparse**
+
+  + ```python
+    # 该方法可以实现URL的而识别和分段
+    from urllib.parse import urlparse
+    
+    result = urlparse('https://www.baidu.con/index.html;user?id=5#comment')
+    print(type(result))
+    # 这里我们利用urlparse方法对一个URL进行了解析，然后输出了解析结构的类型以及结果本身
+    print(result)
+    # 可以看到,解析结果是一个ParseResult类型的对象,包含6部分,分别是scheme , netloc, path、params,query 和fIagment
+    ```
+
+  + urlparse方法在解析URL时有特定的分隔符。例如://前面的内容就是scheme，代表协议。第一个/符号前面便是netloc,即域名;后面是path，即访问路径。分号;后面是 params代表参数。问号?后面是查询条件query，一般用作GET 类型的 URL。井号#后面是锚点fragment.用于直接定位页面内部的下拉位置。
+
+  + **三个参数**
+
+    + urlstring：必填项，解析的URL
+    + scheme：这是默认的协议（eg：http/https）
+    + allow_fragments:是否忽略fragment。如果此项被设置为False，那么 fragment部分就会被忽略，它会被解析为path、 params或者query的一部分，而 fragment部分为空。
+
++ urlunparse
+
+  + 有了urlparse方法，相应就会有它的对立方法 urlunparse，用于构造URL。这个方法接收的参数是一个可迭代对象，<span style="color:red;">**其长度必须是6**</span>，否则会抛出参数数量不足或者过多的问题。
+  + ```pyt
+    from urllib.parse import urlunparse
+    data = ['https', 'www.baidu.com', 'index.html', 'user', 'a=6', 'comment']
+    print(urlunparse(data))
+    ```
+  + 结果：`https://www.baidu.com/index.html;user?a=6#comment`
+
++ **urlsplit**
+
+  + 这个方法和urlparse方法非常相似,只不过它不再单独解析params这一部分（params 会合并到path中)，只返回5个结果。
+  + ```python
+    from urllib.parse import urlsplit
+    result = urlsplit('https://www.baidu.con/index.html;user?id=5#comment')
+    print(result)
+    # 可以发现，返回结果是SplitResult，这其实也是一个元组，即可以用属性名获取其值，也可以用索引获取
+    print(result.scheme,result[0])
+    ```
+
++ **urlunsplit**
+
+  + 与urlunparse方法类似，这也是将链接各个部分组合成完整链接的方法，传入的参数也是一个可迭代对象，例如列表、元组等,唯一区别是这里<span style="color:red;">**参数的长度必须为5**</span>。实例如下:
+  + ```python
+    from urllib.parse import urlunsplit
+    data = ['https', 'www.baidu.com', 'index.html', 'a=6', 'comment']
+    print(urlunsplit(data))
+    ```
+
++ **urljoin**
+
+  + 我们可以提供一个base_url(基础链接)作为该方法的第一个参数,将新的链接作为第二个参数。urljoin方法会分析base_url的scheme ,netloc和 path这3个内容，并对新链接缺失的部分进行补充，最后返回结果。
+  + ```python
+    from urllib.parse import urljoin
+    print(urljoin( 'https://www.baidu.com', 'FAQ.html'))
+    print(urljoin( 'https ://www.baidu.com','https://cuiqingcai.com/FAQ.html'))
+    print(urljoin ( 'https://www.baidu.com/about.html', 'https://cuiqingcai.com/FAQ.htmi'))
+    print(urljoin( 'https://ww.baidu.com/about.htm2', 'https://cuiqingcai.com/FA.html?question-2'))
+    print(urljoin( ' https://www.baidu.com?wd=abc ', 'https://cuiqingcai.com/index.php'))
+    print(urljoin( 'https://ww.baidu.com', '?category=2#comment'))
+    ```
+
++ **urlencode可以用于gey请求**
+
+  + ```python
+    from urllib.parse import urlencode
+    
+    params = {
+        'name': 'germey',
+        'age': 25
+    }
+    
+    base_url = 'https://www.baidu.com'
+    url = base_url + urlencode(params)
+    print(url)
+    ```
+  + 
+
 
 ## 二. 爬虫基础
 
